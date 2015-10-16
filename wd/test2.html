@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>demo3</title>
+    <!-- // <script src="js/easeljs-0.6.0.min.js"></script> -->
+    <script src="js/easeljs.js"></script>
+</head>
+<body>
+	<div class="article">
+		<div class="content">
+			<p>hello <span>hahahahhahaha hahah</span>hahah</p>
+		</div>
+		<p>hello hahah</p>
+	</div>
+	<script>
+(function () {
+    window.delegate = function (rootElement, events) {
+        var arr, key, eventType, method, selector;
+
+        for (key in events) {
+            if (events.hasOwnProperty(key)) {
+                arr = key.split(' ');
+                console.log(arr)
+                eventType = arr.shift();
+                selector = arr.join(' ');
+                method = events[key];
+
+                rootElement.addEventListener(
+                    eventType,
+                    getEventHandler(rootElement, selector, method),
+                    shouldUseCapture(eventType)
+                );
+            }
+        }
+    };
+
+    function shouldUseCapture(eventType) {
+        return ['blur', 'error', 'focus', 'load', 'resize', 'scroll'].indexOf(eventType) !== -1;
+    }
+
+    function getEventHandler(rootElement, selector, method) {
+        return function (e) {
+            var result = true,
+                stopElement = e.currentTarget,
+                targetElement = e.target;
+            do {
+                if (isEventTarget(rootElement, targetElement, selector)) {
+
+                    delete e.target;
+                	console.log(e.target);
+                    e.target = targetElement;
+                	console.log(e.target);
+
+                    result = method.apply(targetElement, arguments);
+                }
+            } while (result && targetElement != stopElement && (targetElement = targetElement.parentNode));
+            return result;
+        }
+    }
+
+    function isEventTarget(rootElement, childElement, selector) {
+        var nodeList = rootElement.querySelectorAll(selector);
+        for (var key in nodeList) {
+            if (nodeList.hasOwnProperty(key) && nodeList[key] === childElement) {
+                return true;
+            }
+        }
+    }
+})();
+window.onload = function(){
+	delegate(document.querySelector('.article'), {
+    'click .article div span': function (a) {
+        console.log('a');
+        return false;
+    },
+    'click .article div':function(){
+    	console.log('b')
+    	return false;
+    }
+});
+}
+	</script>
+</body>
+</html>

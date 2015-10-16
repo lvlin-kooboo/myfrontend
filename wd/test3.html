@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>demo3</title>
+    <!-- // <script src="js/easeljs-0.6.0.min.js"></script> -->
+    <script src="js/easeljs.js"></script>
+</head>
+<body>
+	<div class="article">
+		<div class="content">
+			<p>hello <span>hahahahhahaha hahah</span>hahah</p>
+		</div>
+		<p>hello hahah</p>
+	</div>
+	<script>
+(function () {
+    window.delegate = function (rootElement, events) {
+        var arr, key, eventType, method, selector,
+            delegatesEvents = {};
+
+        for (key in events) {
+            if (events.hasOwnProperty(key)) {
+                arr = key.split(' ');
+                eventType = arr.shift();
+                selector = arr.join(' ');
+                method = events[key];
+
+                delegatesEvents[eventType] = delegatesEvents[eventType] || [];
+                delegatesEvents[eventType].push({
+                    selector: selector,
+                    method: method
+                });
+            }
+        }
+
+        for (eventType in delegatesEvents) {
+            if (delegatesEvents.hasOwnProperty(eventType)) {
+                rootElement.addEventListener(
+                    eventType,
+                    getEventHandler(rootElement, delegatesEvents[eventType]),
+                    shouldUseCapture(eventType)
+                );
+            }
+        }
+    };
+
+    function shouldUseCapture(eventType) {
+        return ['blur', 'error', 'focus', 'load', 'resize', 'scroll'].indexOf(eventType) !== -1;
+    }
+
+    function getEventHandler(rootElement, delegates) {
+        return function (e) {
+            var selector, method, i,
+                bubble = true,
+                stopElement = e.currentTarget,
+                targetElement = e.target;
+                console.log(e)
+            do {
+                // if(delegates[targetElement]){
+                for (i = 0; i < delegates.length&&bubble!=false; i++) {
+                    selector = delegates[i].selector;
+                    method = delegates[i].method;
+                    if (isEventTarget(rootElement, targetElement, selector)) {
+                        bubble = method.apply(targetElement, arguments);
+                    }
+                }
+            } while ( targetElement != stopElement && (targetElement = targetElement.parentNode));
+            return bubble;
+        }
+    }
+
+    function isEventTarget(rootElement, childElement, selector) {
+        var nodeList = rootElement.querySelectorAll(selector);
+        for (var key in nodeList) {
+            if (nodeList.hasOwnProperty(key) && nodeList[key] === childElement) {
+                return true;
+            }
+        }
+    }
+})();
+window.onload = function(){
+	// delegate(document.querySelector('.article'), {
+ //    'click .article div span': function (a) {
+ //        console.log('a');
+ //    },
+ //    'click .article div':function(){
+ //        console.log('b')
+ //        return false;
+ //    },
+ //    'click .article':function(){
+ //        console.log('c')
+ //        return false;
+ //    }
+     // });
+     delegate(document.querySelector('.article .content'), {
+        'click .article span': function (e) {
+            console.log(e.target + '_' + e.currentTarget.className)
+            alert('span');
+        }
+    });
+     delegate(document.querySelector('.article'), {
+        
+        'click .article div': function (e) {
+            console.log(e.target +'_' + e.currentTarget.className)
+            alert('div');
+        }
+    });
+     delegate(document.body, {
+        // 'click .article span': function (e) {
+        //     console.log(e.target + '_' + e.currentTarget.className)
+        //     alert('span');
+        // },
+        // 'click .article div': function (e) {
+        //     console.log(e.target +'_' + e.currentTarget.className)
+        //     alert('div');
+        // },
+        'click .article .content': function (e) {
+            console.log(e.target +'_' + e.currentTarget.className)
+            alert('content')
+        }
+    });
+
+    // var article = document.querySelector('.article'),
+    //     div = article.querySelector('div'),
+    //     span = article.querySelector('span');
+
+    // span.addEventListener('click',function(e){
+    //     console.log('a');
+    // },false);
+    // div.addEventListener('click',function(e){
+    //     console.log('b');
+    //     // e.stopPropagation();
+    //     return false;
+    // },false);
+    // article.addEventListener('click',function(e){
+    //     console.log('c');
+    // },false);
+}
+	</script>
+</body>
+</html>

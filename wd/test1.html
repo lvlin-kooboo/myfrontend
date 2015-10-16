@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<meta name="viewport" content="width=device-width">
+	<style>
+	*{margin: 0;padding: 0;}
+	canvas{display: block;z-index: 10;}
+	body{background: url(images/bg.jpg) no-repeat;-webkit-background-size: 100%;
+	background-size: 100%;}
+	</style>
+    <script src="js/easeljs.js"></script>
+</head>
+<body>
+	<canvas id="canvas"></canvas>
+
+	<script>
+		window.onload = function(){
+			var winWidth = document.documentElement.clientWidth,
+				winHeight = document.documentElement.clientHeight,
+				canvas = document.getElementById('canvas');
+				canvas.width = winWidth;
+				canvas.height = winHeight;
+			var context = canvas.getContext('2d');
+			var ice = new Image();
+			var gap1 = new Image();
+			var gap2 = new Image();
+			ice.onload = function(){
+				init();
+			}
+
+
+
+			ice.src = 'images/ice.png';
+
+			gap1.src = 'images/gap1.png';
+
+			gap2.src = 'images/gap2.png';
+
+			var bitmap1 = new createjs.Bitmap(gap1);
+			var bitmap2 = new createjs.Bitmap(gap2);
+			function init(){
+				var w = ice.width, h = ice.height, ratio = w*winHeight/winWidth;
+
+				context.drawImage(ice,0,0,winWidth, ratio*h);
+
+
+			}
+
+			var particleStage, particleImage, particles = [];
+		    createjs.Ticker.useRAF = true;
+		    createjs.Ticker.framerate = 60;
+			
+			function initParticles() {
+				particleStage = new createjs.Stage(document.getElementById("canvas"));
+				document.addEventListener('click',handleClick);			  
+			}
+
+			function startParticles() {
+			  particleImage = new Image();
+			  particleImage.src = "images/tri.png"; 
+			  particleImage.onload = function(){
+			  	createParticle();
+			  	createjs.Ticker.addEventListener("tick", particleTick);
+			  } 			  
+				
+			}
+
+			function createParticle(){
+				var x = Math.floor(winWidth/particleImage.width),
+					y = Math.floor(winHeight/particleImage.height);
+					console.log(x);
+					console.log(y);
+			  for(var i = 0; i < x; i++){
+			  	for(var j=0; j<y; j++){			  		
+				    var p = new createjs.Bitmap(particleImage);
+				    p.regX = particleImage.width/2;p.regY = particleImage.height/2;
+				    p.x = i*particleImage.width;
+				    p.y = j*particleImage.height;
+				    particleStage.addChild(p);
+				    initParticle(p);
+				    particles.push(p);
+			  	}
+			  }
+			}
+
+			var k = [];
+			function particleTick() {
+				if(k.length == particles.length){
+					// particleStage.removeAllChildren();
+					createjs.Ticker.removeEventListener('tick',particleTick);
+				}
+			  for(var i = 0, l = particles.length; i < l; i++) {
+			    var p = particles[i];
+			    // p.x += p.vx;
+			    p.y += p.vy;
+			    p.vy += 0.9;
+			    p.alpha = 0.95*p.alpha < .8 ? .8 : 0.95*p.alpha;
+			    p.rotation = Math.atan2(p.vy, p.vx) * 180/Math.PI + 180;
+			    if (p.y > winHeight) {
+			    	k['a' + i] = k['a' + i] || (k.length++,i+1);
+			    }
+			  }
+
+			  particleStage.update();
+			}
+
+			function initParticle(p) {
+			  // p.x = Math.random()*winWidth; p.y = Math.random()*winHeight;
+			  p.vx = Math.random() * 30 - 15;
+			  p.vy = Math.random() * 10;
+			  p.alpha = 1;
+			  p.scaleX =  Math.random() + .5;
+  			  p.scaleY = Math.random() + .5;
+
+  			  p.x += (1 - p.scaleX)*particleImage.width + 10;
+			}
+			initParticles();
+			var clickCount = 0;
+			function handleClick(){
+				switch (clickCount){
+					case 0:
+						console.log('hello1');
+					break;
+					case 1:
+						console.log('hello2');
+					break;
+					case 2:
+						console.log('hello3');
+						startParticles();
+					break;
+				}
+				clickCount++;
+			}
+			function localStore(){
+				var setItem, getItem, initialized;
+				if(typeof(Storage) !== "undefined"){
+					initialized = function(b){
+						localStorage.setItem('initialized',b);
+					}
+					getItem = function(){
+						return localStorage.getItem('initialized');
+					}
+					clearItem = function(){
+						localStorage.removeItem('initialized');
+					}
+					return {
+						getInit: getItem,
+						setInit: initialized,
+						clearInit: clearItem
+					}
+				}
+			}
+		}
+	</script>
+</body>
+</html>

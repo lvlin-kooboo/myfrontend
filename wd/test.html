@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>demo3</title>
+    <!-- // <script src="js/easeljs-0.6.0.min.js"></script> -->
+    <script src="js/easeljs.js"></script>
+</head>
+<body>
+	<canvas id="demoCanvas"></canvas>
+	<script>
+		var numberOfImagesLoaded = 0,
+			winHeight = document.documentElement.clientHeight,
+			winWidth = document.documentElement.clientWidth,
+			imgBackground = new Image(),
+			imgGap1 = new Image(),
+			imgGap2 = new Image(),
+			imgIce = new Image();
+
+		function init(){
+			canvas = document.getElementById('demoCanvas');
+			canvas.width = winWidth;
+			canvas.height = winHeight;
+			imgBackground.onload = handleImageLoad;
+			imgBackground.onerror = handleImageError;
+			imgBackground.src = 'images/bg.jpg';
+
+			imgIce.onload = handleImageLoad;
+			imgIce.onerror = handleImageError;
+			imgIce.src = 'images/ice.png';
+
+			imgGap1.onload = handleImageLoad;
+			imgGap1.onerror = handleImageError;
+			imgGap1.src = 'images/gap1.png';
+
+			imgGap2.onload = handleImageLoad;
+			imgGap2.onerror = handleImageError;
+			imgGap2.src = 'images/gap2.png';
+		}
+
+		function handleImageLoad(){
+			numberOfImagesLoaded++;
+			if(numberOfImagesLoaded == 4){
+				numberOfImagesLoaded = 0;
+				startGame();
+			}
+		}
+
+		function handleImageError(){
+
+		}
+
+		function startGame(){
+			stage = new createjs.Stage(canvas);
+
+			createjs.Touch.enable(stage);
+		
+			screen_width = canvas.width;
+			screen_height = canvas.height;
+
+			var spriteSheet = new createjs.SpriteSheet({
+				images: [imgGap1,imgGap2],
+				frames: [
+					[50,50,498,306,0],
+					[0,0,589,611,1]
+				],
+				animations: {
+					step1: {
+						frames:[0],
+						next: 'step2'
+					},
+					step2: {
+						frames:[1,0]
+					}
+				}
+			});
+			console.log(spriteSheet)
+			 createjs.SpriteSheetUtils.addFlippedFrames(spriteSheet, true, true, false);
+			// var spriteSheetIdle = new createjs.SpriteSheet({
+			// 	images: [imgMonsterAIdle],
+			// 	frames: {width: 64, height: 64, regX: 32, regY: 32},
+			// 	animations: {
+			// 		idle: [0,10,'idle',.25]
+			// 	}
+			// });
+
+
+			// bmpAnimation = new createjs.BitmapAnimation(spriteSheet);
+			// bmpAnimation = new createjs.BitmapAnimation(spriteSheet);
+			 // sprite2 = new createjs.Sprite(spriteSheetIdle);
+				sprite = new createjs.Sprite(spriteSheet,'step2');
+			// console.log(createjs)
+			sprite.regX = sprite.spriteSheet.frameHeight/2 |0;
+			sprite.regY = sprite.spriteSheet.frameHeight/2 |0;
+			console.log(sprite.regX +'_' + sprite.spriteSheet.frameWidth);
+
+
+
+			sprite.gotoAndPlay('step2');
+
+			sprite.shadow = new createjs.Shadow('#454',0,5,4);
+
+			sprite.name = 'icebreak';
+			sprite.direction = 90;
+			sprite.x = 16;
+			sprite.y = 32;
+
+			sprite.currentFrame = 1;
+
+			stage.addChild(sprite);
+		    createjs.Ticker.useRAF = true;
+		    createjs.Ticker.setFPS(60);
+			createjs.Ticker.on('tick',tick);
+
+		}
+
+		// document.onclick = function(){
+		// 	alert(1)
+		// };
+
+		// function handleTouch(e){
+		// 	console.log(e)
+		// 	sprite.gotoAndPlay('knock');
+		// 	stage.update();
+		// }
+
+		// createjs.Ticker.addEventListener(window);
+		var i = 0 , j=0;
+		createjs.Ticker.useRAF = true;
+
+		createjs.Ticker.setFPS(60);
+
+		function tick(){
+
+			if(i==0 && j==0){
+				sprite.gotoAndPlay("step1");
+				i=1;
+			}else{
+				sprite.gotoAndStop("step2");
+				i = 0;
+				// j++;
+			}
+			// createjs.Ticker.paused = true;
+			/*if(sprite.x >= screen_width - 16){
+				sprite.direction = -90;
+        		sprite.gotoAndPlay("walk");
+			}
+
+			if(sprite.x < 16){
+				sprite.direction = 90;
+        		sprite.gotoAndStop("walk");
+        		stage.removeChild(sprite);
+        		sprite2.gotoAndPlay('idle');
+        		stage.addChild(sprite2);
+			}
+			if (sprite.direction == 90) {
+		        sprite.x += sprite.vX;
+		    }
+		    else {
+		        sprite.x -= sprite.vX;
+		    }*/
+
+
+			stage.update();
+
+		}
+
+
+
+		init();
+
+
+
+		var particleStage; 
+var particleImage; 
+var particles = [];
+var emitterPoint = new createjs.Point(175, 250);
+
+window.addEventListener("load", initParticles, false);
+
+function initParticles() {
+  particleStage = new createjs.Stage(document.getElementById("myCanvas"));
+  startParticles();
+  
+}
+
+function startParticles() {
+  particleImage = new Image();
+  particleImage.src = "http://www.gbtags.com/gb/laitu/50x50&text=GB/efb73e/ffffff";  
+  createjs.Ticker.addEventListener("tick", particleTick);
+}
+
+function particleTick() {
+  if (particles.length < 50) {
+    var p = new createjs.Bitmap(particleImage);
+    p.regX = 25;p.regY = 28;
+    particleStage.addChild(p);
+    initParticle(p);
+    particles.push(p);
+  }
+  
+  for(var i = 0, l = particles.length; i < l; i++) {
+    var p = particles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.9;
+    p.alpha *= 0.95;
+    p.rotation = Math.atan2(p.vy, p.vx) * 180/Math.PI + 180;
+    if (p.y > 420 || p.alpha < 0.01) {
+      initParticle(p);
+    }
+  }
+  particleStage.update();
+}
+
+function initParticle(p) {
+  p.x = emitterPoint.x; p.y = emitterPoint.y;
+  p.vx = Math.random() * 30 - 15;
+  p.vy = Math.random() * -20;
+  p.alpha = 1;
+  p.scaleX = p.scaleY = 1;
+}
+
+	</script>
+</body>
+</html>
